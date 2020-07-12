@@ -12,22 +12,21 @@
     :license:   GPL-3.0, see LICENSE for more details.
     :copyright: Copyright (c) 2017-2020 lightless. All rights reserved
 """
-import queue
 import signal
 
-from reader.engine.refresh import RefreshEngine
+from reader import g
+from reader.context.engine_context import ApplicationEngineContext
+from reader.context.queue_context import ApplicationQueueContext
 from reader.util.logger import logger
 
 
-class ApplicationContext(object):
-    class Queues:
-        feed_task_queue: queue.Queue
-
-    class Engines:
-        refresh_engine: RefreshEngine
+class Application(object):
 
     def __init__(self):
-        super(ApplicationContext, self).__init__()
+        super(Application, self).__init__()
+
+        g.queue_context = self.queues = ApplicationQueueContext()
+        self.engines = ApplicationEngineContext()
 
     def start(self):
         signal.signal(signal.SIGINT, self.__sigint)
@@ -40,12 +39,11 @@ class ApplicationContext(object):
         logger.info("Init engines done.")
 
     def init_queues(self):
-        self.Queues.feed_task_queue = queue.Queue(maxsize=16)
+        self.queues.init_queues()
 
     def init_engines(self):
-        self.Engines.refresh_engine = RefreshEngine("refresh_engine")
-        self.Engines.refresh_engine.start()
+        self.engines.init_engines()
 
     def __sigint(self, sig, frame):
         logger.info("Receive exit signal.")
-        self.Engines.refresh_engine.stop()
+        self.engines.stop_engines()

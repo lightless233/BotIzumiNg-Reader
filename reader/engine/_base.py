@@ -13,7 +13,10 @@
     :copyright: Copyright (c) 2017-2020 lightless. All rights reserved
 """
 import abc
+import asyncio
+import multiprocessing
 import threading
+from typing import Optional
 
 from reader.base.constant import EngineStatus
 
@@ -42,15 +45,46 @@ class CommonBaseEngine(object):
         pass
 
 
-class CoEngine(CommonBaseEngine):
-    # def start(self):
-    #     raise NotImplementedError
-    #
-    # def stop(self):
-    #     raise NotImplementedError
-    #
-    # def is_alive(self):
-    #     raise NotImplementedError
+class CoPoolEngine(CommonBaseEngine):
+
+    def __init__(self, name, pool_size=None):
+        super(CoPoolEngine, self).__init__()
+        self.name = name
+
+        self.co_wrapper_thread: Optional[threading.Thread] = None
+        self.loop = None
+
+        self.event: Optional[asyncio.Event] = None
+
+        self.pool_size = pool_size if pool_size else multiprocessing.cpu_count() * 2 + 1
+
+    def start(self):
+        self.status = EngineStatus.RUNNING
+        self.co_wrapper_thread = threading.Thread(target=self.__wrapper, name=self.name)
+        self.co_wrapper_thread.start()
+
+    def stop(self):
+        self.status = EngineStatus.STOP
+        self.event.set()
+
+    def is_alive(self):
+        return self.co_wrapper_thread.is_alive()
+
+    def _init_event(self):
+        self.event = asyncio.Event()
+
+    async def _wait(self, timeout: float):
+        try:
+            await asyncio.wait_for(self.event.wait(), timeout)
+        except asyncio.TimeoutError:
+            pass
+        finally:
+            return self.event.is_set()
+
+    def __wrapper(self):
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.loop)
+        self.loop.run_until_complete(asyncio.gather(*[self._worker(idx) for idx in range(self.pool_size)]))
 
     @abc.abstractmethod
     async def _worker(self, idx):
@@ -63,7 +97,7 @@ class ThreadEngine(CommonBaseEngine):
         super(ThreadEngine, self).__init__()
 
         self.name = name
-        self.worker_thread: threading.Thread
+        self.worker_thread: Optional[threading.Thread] = None
         self.thread_event: threading.Event = threading.Event()
 
     def start(self):

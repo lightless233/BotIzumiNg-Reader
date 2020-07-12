@@ -15,7 +15,7 @@
 from django.core.management import BaseCommand
 
 from reader import g
-from reader.application_context import ApplicationContext
+from reader.application import Application
 
 
 class Command(BaseCommand):
@@ -26,8 +26,8 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("Starting izumi-ng reader."))
 
         try:
-            g.application_context = ApplicationContext()
-            g.application_context.start()
+            g.application = app = Application()
+            app.start()
         except Exception as e:
             self.stdout.write(f"Error while starting izumi-ng reader, error: {e}")
 

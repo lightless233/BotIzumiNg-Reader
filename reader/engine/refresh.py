@@ -39,13 +39,14 @@ class RefreshEngine(ThreadEngine):
     def _worker(self):
 
         logger.info(f"{self.name} start!")
-        task_queue = g.application_context.Queues.feed_task_queue
+        task_queue = g.queue_context.feed_task_queue
 
         while self.is_running():
 
             # 从db中找到所有的待刷新的 feed 源
             row: FeedModel
             for row in FeedModel.instance.all():
+                logger.debug(f"row.last_refresh_time: {row.last_refresh_time}")
                 if row.last_refresh_time + datetime.timedelta(minutes=row.interval) > datetime.datetime.now():
                     continue
 

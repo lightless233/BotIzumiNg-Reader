@@ -13,4 +13,10 @@
     :license:   GPL-3.0, see LICENSE for more details.
     :copyright: Copyright (c) 2017-2020 lightless. All rights reserved
 """
-application_context = None
+from typing import Optional
+
+from reader.application import Application
+from reader.context.queue_context import ApplicationQueueContext
+
+application: Optional["Application"] = None
+queue_context: Optional["ApplicationQueueContext"] = None
