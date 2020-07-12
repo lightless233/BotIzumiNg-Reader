@@ -12,13 +12,17 @@
     :license:   GPL-3.0, see LICENSE for more details.
     :copyright: Copyright (c) 2017-2020 lightless. All rights reserved
 """
+import datetime
+
 from django.db import models
 
 from reader.base.models._base import BaseModel
 
 
 class FeedManager(models.Manager):
-    pass
+
+    def all(self):
+        return self.filter(is_deleted=0).all()
 
 
 class FeedModel(BaseModel):
@@ -34,4 +38,5 @@ class FeedModel(BaseModel):
     interval = models.PositiveIntegerField()
     status = models.PositiveSmallIntegerField()
     enabled = models.PositiveSmallIntegerField()
+    last_refresh_time = models.DateTimeField(default=datetime.datetime.now)
     author = models.PositiveIntegerField()
