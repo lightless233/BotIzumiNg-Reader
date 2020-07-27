@@ -36,7 +36,13 @@ class FeedModel(BaseModel):
     description = models.CharField(max_length=1024)
     feed_url = models.TextField()
     interval = models.PositiveIntegerField()
+
+    # 该源的当前状态
+    # 0-待更新，1-更新中，2-存活，3-已死亡
     status = models.PositiveSmallIntegerField()
+
+    # 是否开启
+    # 0-关闭，1-开启
     enabled = models.PositiveSmallIntegerField()
     last_refresh_time = models.DateTimeField(default=datetime.datetime.now)
     author = models.PositiveIntegerField()

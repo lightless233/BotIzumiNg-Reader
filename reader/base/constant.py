@@ -20,3 +20,12 @@ class EngineStatus:
     READY = 0x00
     RUNNING = 0x01
     STOP = 0x02
+
+
+@dataclass
+class FeedsStatus:
+    # 0-待更新，1-更新中，2-存活，3-已死亡
+    TOBE_UPDATE = 0
+    UPDATING = 1
+    ALIVE = 2
+    DEAD = 3

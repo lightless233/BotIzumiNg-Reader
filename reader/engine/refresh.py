@@ -16,6 +16,7 @@ import datetime
 import queue
 
 from reader import g
+from reader.base.constant import FeedsStatus
 from reader.base.models.feed import FeedModel
 from reader.engine._base import ThreadEngine
 from reader.util.logger import logger
@@ -46,7 +47,7 @@ class RefreshEngine(ThreadEngine):
             # 从db中找到所有的待刷新的 feed 源
             row: FeedModel
             for row in FeedModel.instance.all():
-                logger.debug(f"row.last_refresh_time: {row.last_refresh_time}")
+                logger.debug(f"name: {row.name} ,last_refresh_time: {row.last_refresh_time}")
                 if row.last_refresh_time + datetime.timedelta(minutes=row.interval) > datetime.datetime.now():
                     continue
 
@@ -61,6 +62,7 @@ class RefreshEngine(ThreadEngine):
 
                 # update last_refresh_time
                 row.last_refresh_time = datetime.datetime.now()
+                row.status = FeedsStatus.UPDATING
                 row.save()
 
             # wait for next wakeup
