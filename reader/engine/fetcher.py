@@ -27,6 +27,7 @@ class FetcherEngine(CoPoolEngine):
         super(FetcherEngine, self).__init__(name, pool_size)
 
         self.feed_task_queue: queue.Queue = g.queue_context.feed_task_queue
+        self.parser_task_queue: queue.Queue = g.queue_context.parser_task_queue
 
         self.client_timeout = aiohttp.ClientTimeout(total=60, connect=12, sock_read=12, sock_connect=12)
 
@@ -58,6 +59,19 @@ class FetcherEngine(CoPoolEngine):
 
                     # status code 是 200 的情况
                     content = await resp.text()
+                    parser_task = {
+                        "feed_task": task,
+                        "content": content,
+                    }
+                    while self.is_running():
+                        try:
+                            self.parser_task_queue.put_nowait(parser_task)
+                        except queue.Full:
+                            logger.warning(f"{cur_name} parser task queue full, retry..")
+                            await self._wait(1)
+                        else:
+                            break
+
                     logger.debug(f"{cur_name} {content}")
 
             except queue.Empty:
