@@ -14,7 +14,7 @@
 """
 from typing import Optional
 
-from reader.engine import FetcherEngine, RefreshEngine
+from reader.engine import FetcherEngine, RefreshEngine, ParserEngine
 
 
 class ApplicationEngineContext(object):
@@ -23,6 +23,7 @@ class ApplicationEngineContext(object):
         super(ApplicationEngineContext, self).__init__()
         self.refresh_engine: Optional[RefreshEngine] = None
         self.fetcher_engine: Optional[FetcherEngine] = None
+        self.parser_engine: Optional[ParserEngine] = None
 
     def init_engines(self):
         self.refresh_engine = RefreshEngine("refresh_engine")
@@ -30,6 +31,9 @@ class ApplicationEngineContext(object):
 
         self.fetcher_engine = FetcherEngine("fetcher_engine")
         self.fetcher_engine.start()
+
+        self.parser_engine = ParserEngine("parser_engine")
+        self.parser_engine.start()
 
     def stop_engines(self):
         self.refresh_engine.stop()

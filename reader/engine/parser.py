@@ -13,6 +13,7 @@
     :copyright: Copyright (c) 2017-2020 lightless. All rights reserved
 """
 import queue
+from calendar import timegm
 from datetime import datetime, timezone, timedelta
 from time import mktime
 
@@ -68,11 +69,19 @@ class ParserEngine(ThreadEngine):
             link = entry.get("link")
             summary = entry.get("summary")
             summary = summary[:128] if len(summary) > 128 else summary
-            published_time_struct = entry.get("published_parsed")
+            st_time = entry.get("published_parsed")
+            time_string = entry.get("published")
 
-            # todo deal with struct time
-            dt = datetime.fromtimestamp(mktime(published_time_struct))
+            # st_time have no timezone info, just convert it to UTC+8
+            # use arrow lib:
+            #   atime = arrow.get(st_time)
+            #   atime = atime.astimezone(tz.gettz("Asia/Shanghai"))
+            # or use python lib (FUCKING PYTHON LIB):
+            dt = datetime.fromtimestamp(timegm(st_time))
             dt = dt.astimezone(timezone(timedelta(hours=8)))
+            logger.debug(f"title: {title}, st_time: {st_time}, time_string: {time_string}, dt: {dt}")
+
+            # TODO: add to save queue
 
     def __parse_atom10(self, fd):
         pass

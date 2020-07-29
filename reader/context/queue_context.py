@@ -22,7 +22,6 @@ class ApplicationQueueContext(object):
         super(ApplicationQueueContext, self).__init__()
 
         self.feed_task_queue: Optional[queue.Queue] = None
-
         self.parser_task_queue: Optional[queue.Queue] = None
 
     def init_queues(self):

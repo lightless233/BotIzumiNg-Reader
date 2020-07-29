@@ -72,7 +72,7 @@ class FetcherEngine(CoPoolEngine):
                         else:
                             break
 
-                    logger.debug(f"{cur_name} {content}")
+                    logger.debug(f"{cur_name} content size: {len(content)}")
 
             except queue.Empty:
                 await self._wait(1)

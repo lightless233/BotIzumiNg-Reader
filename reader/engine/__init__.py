@@ -14,3 +14,4 @@
 """
 from .fetcher import FetcherEngine
 from .refresh import RefreshEngine
+from .parser import ParserEngine
