@@ -14,3 +14,5 @@
 """
 
 from .feed import FeedModel
+from .paper import PaperModel
+from .paper_rank import PaperRankModel

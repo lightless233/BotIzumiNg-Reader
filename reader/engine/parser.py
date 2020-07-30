@@ -13,12 +13,9 @@
     :copyright: Copyright (c) 2017-2020 lightless. All rights reserved
 """
 import queue
-from calendar import timegm
-from datetime import datetime, timezone, timedelta
-from time import mktime
 
 import feedparser
-from pytz import utc
+import jieba.analyse
 
 from reader import g
 from reader.engine._base import ThreadEngine
@@ -31,6 +28,7 @@ class ParserEngine(ThreadEngine):
         super(ParserEngine, self).__init__(name)
 
         self.parser_task_queue: queue.Queue = g.queue_context.parser_task_queue
+        self.save_queue: queue.Queue = g.queue_context.save_task_queue
 
     def _worker(self):
         # 有两种格式，需要分别做解析
@@ -53,12 +51,29 @@ class ParserEngine(ThreadEngine):
             fd_version = fd.version
 
             if fd_version == "rss20":
-                self.__parse_rss20(fd)
+                save_task = self.__parse_rss20(fd)
             elif fd_version == "atom10":
-                self.__parse_atom10(fd)
+                save_task = self.__parse_atom10(fd)
             else:
                 logger.error(f"{self.name} unknown fd_version: {fd_version}")
                 continue
+
+            # put `feed_task` to save task
+            save_task["feed_task"] = task.get("feed_task")
+
+            # extract tags from summary
+            save_task["tags"] = jieba.analyse.extract_tags(save_task["content"], topK=5)
+
+            # put save task to queue
+            while True:
+                try:
+                    self.save_queue.put_nowait(save_task)
+                    self.thread_event.wait(1)
+                except queue.Full:
+                    logger.warning(f"{self.name} save_queue full, retry...")
+                    continue
+                else:
+                    break
 
     @staticmethod
     def __parse_rss20(fd):
@@ -68,8 +83,7 @@ class ParserEngine(ThreadEngine):
             title = entry.get("title")
             link = entry.get("link")
             summary = entry.get("summary")
-            summary = summary[:128] if len(summary) > 128 else summary
-            st_time = entry.get("published_parsed")
+            # st_time = entry.get("published_parsed")
             time_string = entry.get("published")
 
             # st_time have no timezone info, just convert it to UTC+8
@@ -77,11 +91,36 @@ class ParserEngine(ThreadEngine):
             #   atime = arrow.get(st_time)
             #   atime = atime.astimezone(tz.gettz("Asia/Shanghai"))
             # or use python lib (FUCKING PYTHON LIB):
-            dt = datetime.fromtimestamp(timegm(st_time))
-            dt = dt.astimezone(timezone(timedelta(hours=8)))
-            logger.debug(f"title: {title}, st_time: {st_time}, time_string: {time_string}, dt: {dt}")
+            # dt = datetime.fromtimestamp(timegm(st_time))
+            # dt = dt.astimezone(timezone(timedelta(hours=8)))
+            # logger.debug(f"title: {title}, st_time: {st_time}, time_string: {time_string}, dt: {dt}")
 
             # TODO: add to save queue
+            save_task = {
+                "title": title,
+                "content": summary,
+                "publish_time": time_string,
+                "link": link
+            }
 
-    def __parse_atom10(self, fd):
-        pass
+            return save_task
+
+    @staticmethod
+    def __parse_atom10(fd):
+        entries = fd.entries
+        entry: feedparser.FeedParserDict
+        for entry in entries:
+            title = entry.get("title")
+            link = entry.get("link")
+            summary = entry.get("summary")
+            time_string = entry.get("updated")
+
+            # TODO: add to save queue
+            save_task = {
+                "title": title,
+                "content": summary,
+                "publish_time": time_string,
+                "link": link
+            }
+
+            return save_task

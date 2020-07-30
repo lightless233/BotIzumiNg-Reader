@@ -23,7 +23,9 @@ class ApplicationQueueContext(object):
 
         self.feed_task_queue: Optional[queue.Queue] = None
         self.parser_task_queue: Optional[queue.Queue] = None
+        self.save_task_queue: Optional[queue.Queue] = None
 
     def init_queues(self):
         self.feed_task_queue = queue.Queue(maxsize=16)
         self.parser_task_queue = queue.Queue(maxsize=32)
+        self.save_task_queue = queue.Queue(maxsize=32)

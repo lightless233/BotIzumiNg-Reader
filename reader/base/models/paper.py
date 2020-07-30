@@ -33,8 +33,12 @@ class PaperModel(BaseModel):
     feed_id = models.BigIntegerField()
     title = models.CharField(max_length=512)
     content = models.TextField()
+    link = models.TextField(default="")
     unique_hash = models.CharField(max_length=64)
     tags = models.TextField()
     pushed_status = models.PositiveSmallIntegerField()
     pushed_time = models.DateTimeField(default=datetime.datetime.now)
     rank = models.PositiveSmallIntegerField(default=0)
+
+    # paper的发布时间，这个时间是取的原始时间，没有处理过
+    publish_time = models.TextField()
