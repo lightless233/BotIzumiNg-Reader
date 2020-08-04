@@ -20,7 +20,9 @@ from reader.base.models._base import BaseModel
 
 
 class PaperManager(models.Manager):
-    pass
+
+    def get_paper_by_unique_hash(self, uh: str) -> "PaperModel":
+        return self.filter(unique_hash=uh).first()
 
 
 class PaperModel(BaseModel):
@@ -34,10 +36,12 @@ class PaperModel(BaseModel):
     title = models.CharField(max_length=512)
     content = models.TextField()
     link = models.TextField(default="")
-    unique_hash = models.CharField(max_length=64)
+    unique_hash = models.CharField(max_length=256)
     tags = models.TextField()
     pushed_status = models.PositiveSmallIntegerField()
     pushed_time = models.DateTimeField(default=datetime.datetime.now)
+
+    # 这个rank是最终的rank，根据paper_rank中计算出来的
     rank = models.PositiveSmallIntegerField(default=0)
 
     # paper的发布时间，这个时间是取的原始时间，没有处理过

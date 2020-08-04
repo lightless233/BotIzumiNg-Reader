@@ -14,7 +14,7 @@
 """
 from typing import Optional
 
-from reader.engine import FetcherEngine, RefreshEngine, ParserEngine
+from reader.engine import FetcherEngine, RefreshEngine, ParserEngine, SaveEngine
 
 
 class ApplicationEngineContext(object):
@@ -24,8 +24,11 @@ class ApplicationEngineContext(object):
         self.refresh_engine: Optional[RefreshEngine] = None
         self.fetcher_engine: Optional[FetcherEngine] = None
         self.parser_engine: Optional[ParserEngine] = None
+        self.save_engine: Optional[SaveEngine] = None
 
     def init_engines(self):
+        """启动的时候应该从最后的 engine 开始启动"""
+        # TODO: fix order
         self.refresh_engine = RefreshEngine("refresh_engine")
         self.refresh_engine.start()
 
@@ -35,6 +38,12 @@ class ApplicationEngineContext(object):
         self.parser_engine = ParserEngine("parser_engine")
         self.parser_engine.start()
 
+        self.save_engine = SaveEngine("save_engine")
+        self.save_engine.start()
+
     def stop_engines(self):
+        """结束的时候从最前的 engine 开始结束"""
         self.refresh_engine.stop()
         self.fetcher_engine.stop()
+        self.parser_engine.stop()
+        self.save_engine.stop()
