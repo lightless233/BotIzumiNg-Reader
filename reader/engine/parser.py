@@ -51,34 +51,39 @@ class ParserEngine(ThreadEngine):
             fd_version = fd.version
 
             if fd_version == "rss20":
-                save_task = self.__parse_rss20(fd)
+                logger.debug(f"{self.name} use rss20 parser.")
+                save_tasks = self.__parse_rss20(fd)
             elif fd_version == "atom10":
-                save_task = self.__parse_atom10(fd)
+                logger.debug(f"{self.name} use atom10 parser.")
+                save_tasks = self.__parse_atom10(fd)
             else:
                 logger.error(f"{self.name} unknown fd_version: {fd_version}")
                 continue
 
-            # put `feed_task` to save task
-            save_task["feed_task"] = task.get("feed_task")
+            for save_task in save_tasks:
+                # put `feed_task` to save task
+                save_task["feed_task"] = task.get("feed_task")
 
-            # extract tags from summary
-            save_task["tags"] = jieba.analyse.extract_tags(save_task["content"], topK=5)
+                # extract tags from summary
+                save_task["tags"] = jieba.analyse.extract_tags(save_task["content"], topK=5)
 
-            # put save task to queue
-            while True:
-                try:
-                    self.save_queue.put_nowait(save_task)
-                    self.thread_event.wait(1)
-                except queue.Full:
-                    logger.warning(f"{self.name} save_queue full, retry...")
-                    continue
-                else:
-                    break
+                # put save task to queue
+                while self.is_running():
+                    try:
+                        self.save_queue.put_nowait(save_task)
+                        self.thread_event.wait(1)
+                    except queue.Full:
+                        logger.warning(f"{self.name} save_queue full, retry...")
+                        continue
+                    else:
+                        break
 
     @staticmethod
     def __parse_rss20(fd):
         entries = fd.entries
         entry: feedparser.FeedParserDict
+        save_tasks = []
+
         for entry in entries:
             title = entry.get("title")
             link = entry.get("link")
@@ -103,12 +108,16 @@ class ParserEngine(ThreadEngine):
                 "link": link
             }
 
-            return save_task
+            save_tasks.append(save_task)
+
+        return save_tasks
 
     @staticmethod
     def __parse_atom10(fd):
         entries = fd.entries
         entry: feedparser.FeedParserDict
+        save_tasks = []
+
         for entry in entries:
             title = entry.get("title")
             link = entry.get("link")
@@ -123,4 +132,5 @@ class ParserEngine(ThreadEngine):
                 "link": link
             }
 
-            return save_task
+            save_tasks.append(save_task)
+        return save_tasks

@@ -39,10 +39,13 @@ class SaveEngine(ThreadEngine):
                 continue
 
             feed_id = task.get("feed_task").get("id")
-            title = task.get("title")
-            content = task.get("content")
+            title: str = task.get("title")
+            content: str = task.get("content")
             link = task.get("link")
-            unique_hash = "{}|{}".format(hashlib.md5(title).hexdigest(), hashlib.md5(content).hexdigest())
+            unique_hash = "{}|{}".format(
+                hashlib.md5(title.encode()).hexdigest(),
+                hashlib.md5(content.encode()).hexdigest()
+            )
             tags = task.get("tags")
             publish_time = task.get("publish_time")
 
@@ -54,5 +57,6 @@ class SaveEngine(ThreadEngine):
                 paper = PaperModel(feed_id=feed_id, title=title, content=content, link=link, unique_hash=unique_hash,
                                    tags=tags, pushed_status=0, publish_time=publish_time)
                 paper.save()
+                logger.debug(f"{self.name} paper saved, title: {title}, unique_hash: {unique_hash}")
 
         logger.info(f"{self.name} stop!")
