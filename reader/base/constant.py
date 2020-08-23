@@ -29,3 +29,15 @@ class FeedsStatus:
     UPDATING = 1
     ALIVE = 2
     DEAD = 3
+
+
+class ResponseCode:
+    SUCCESS = 2000
+
+    UNKNOWN_ERROR = 4000
+    ERROR_PARAMS = 4001
+    ERROR_DB = 4002
+    ERROR_RUNTIME = 4003
+
+
+TIME_FORMAT_STRING = "%Y-%m-%d %H:%M:%S"
