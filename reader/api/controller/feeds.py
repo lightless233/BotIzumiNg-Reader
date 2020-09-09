@@ -12,6 +12,7 @@
     :license:   GPL-3.0, see LICENSE for more details.
     :copyright: Copyright (c) 2017-2020 lightless. All rights reserved
 """
+import time
 from datetime import datetime
 
 from django.views import View
@@ -57,7 +58,7 @@ class AddFeedsView(View):
         )
         if obj:
             return {
-                "code": 1000,
+                "code": ResponseCode.SUCCESS,
                 "message": "添加成功!",
                 "data": {
                     "id": obj.id,
@@ -76,3 +77,30 @@ class AddFeedsView(View):
                 "code": ResponseCode.ERROR_DB,
                 "message": "添加失败!",
             }
+
+
+class ListFeedView(View):
+
+    @staticmethod
+    @json_response
+    def get(request):
+        result = []
+        objs = FeedModel.instance.all()
+        for obj in objs:
+            result.append({
+                "id": obj.id,
+                "name": obj.name,
+                "description": obj.description,
+                "feedUrl": obj.feed_url,
+                "interval": obj.interval,
+                "status": obj.status,
+                "enabled": obj.enabled,
+                "last_refresh_time": obj.last_refresh_time.strftime("%Y-%m-%d %H:%M:%S"),
+                "author": obj.author,
+            })
+        # time.sleep(10)
+        return {
+            "code": ResponseCode.SUCCESS,
+            "data": result,
+            "message": "获取成功!"
+        }
