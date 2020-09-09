@@ -33,7 +33,7 @@ class AddFeedsView(View):
         check_result = RequestValidator.check(request, {
             "name": {"empty": True},
             "description": {"empty": True},
-            "feed_url": {"empty": True},
+            "feedUrl": {"empty": True},
             "interval": {"empty": True, "type": int},
         }, RequestValidator.Methods.POST_JSON)
 
