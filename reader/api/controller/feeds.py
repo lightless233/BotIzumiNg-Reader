@@ -47,7 +47,7 @@ class AddFeedsView(View):
         obj = FeedModel.objects.create(
             name=params.get("name"),
             description=params.get("description"),
-            feed_url=params.get("feed_url"),
+            feed_url=params.get("feedUrl"),
             interval=params.get("interval"),
             status=0,
             enabled=0,
