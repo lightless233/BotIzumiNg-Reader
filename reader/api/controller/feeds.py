@@ -51,6 +51,7 @@ class AddFeedsView(View):
             feed_url=params.get("feedUrl"),
             interval=params.get("interval"),
             status=0,
+            health_status=0,
             enabled=0,
             last_refresh_time=datetime.now(),
             author=1,  # TODO: author 字段先保留
@@ -62,13 +63,14 @@ class AddFeedsView(View):
                 "message": "添加成功!",
                 "data": {
                     "id": obj.id,
-                    "name": obj.name,
+                    "feedName": obj.name,
                     "description": obj.description,
-                    "feed_url": obj.feed_url,
+                    "feedUrl": obj.feed_url,
                     "interval": int(obj.interval),
                     "status": int(obj.status),
+                    "healthStatus": int(obj.health_status),
                     "enabled": int(obj.enabled),
-                    "last_refresh_time": obj.last_refresh_time.strftime(TIME_FORMAT_STRING),
+                    "lastRefreshTime": obj.last_refresh_time.strftime(TIME_FORMAT_STRING),
                     "author": obj.author,
                 }
             }
@@ -89,13 +91,14 @@ class ListFeedView(View):
         for obj in objs:
             result.append({
                 "id": obj.id,
-                "name": obj.name,
+                "feedName": obj.name,
                 "description": obj.description,
                 "feedUrl": obj.feed_url,
-                "interval": obj.interval,
-                "status": obj.status,
-                "enabled": obj.enabled,
-                "last_refresh_time": obj.last_refresh_time.strftime("%Y-%m-%d %H:%M:%S"),
+                "interval": int(obj.interval),
+                "status": int(obj.status),
+                "healthStatus": int(obj.health_status),
+                "enabled": int(obj.enabled),
+                "lastRefreshTime": obj.last_refresh_time.strftime(TIME_FORMAT_STRING),
                 "author": obj.author,
             })
         # time.sleep(10)

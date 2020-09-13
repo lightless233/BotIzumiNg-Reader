@@ -16,7 +16,7 @@ import datetime
 import queue
 
 from reader import g
-from reader.base.constant import FeedsStatus
+from reader.base.constant import FeedStatus
 from reader.base.models.feed import FeedModel
 from reader.engine._base import ThreadEngine
 from reader.util.logger import logger
@@ -62,7 +62,7 @@ class RefreshEngine(ThreadEngine):
 
                 # update last_refresh_time
                 row.last_refresh_time = datetime.datetime.now()
-                row.status = FeedsStatus.UPDATING
+                row.status = FeedStatus.UPDATING
                 row.save()
 
             # wait for next wakeup

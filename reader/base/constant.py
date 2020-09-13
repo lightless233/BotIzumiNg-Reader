@@ -23,11 +23,19 @@ class EngineStatus:
 
 
 @dataclass
-class FeedsStatus:
-    # 0-待更新，1-更新中，2-存活，3-已死亡
+class FeedStatus:
+    # 0-待更新，1-更新中，2-更新完成
     TOBE_UPDATE = 0
     UPDATING = 1
     ALIVE = 2
+
+
+@dataclass
+class FeedHealthStatus:
+    # 0-默认状态，1-活跃更新，2-不活跃更新，3-无法连通
+    DEFAULT = 0
+    ACTIVATE = 1
+    INACTIVATE = 2
     DEAD = 3
 
 

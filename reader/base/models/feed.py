@@ -44,5 +44,10 @@ class FeedModel(BaseModel):
     # 是否开启
     # 0-关闭，1-开启
     enabled = models.PositiveSmallIntegerField()
+
+    # 订阅源的健康状态
+    # 0-默认状态，1-活跃更新，2-不活跃更新，3-无法连通
+    health_status = models.PositiveSmallIntegerField(default=0)
+
     last_refresh_time = models.DateTimeField(default=datetime.datetime.now)
     author = models.PositiveIntegerField()
