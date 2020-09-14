@@ -15,6 +15,7 @@
 import datetime
 
 from django.db import models
+from django.db import transaction
 
 from reader.base.models._base import BaseModel
 
@@ -23,6 +24,29 @@ class FeedManager(models.Manager):
 
     def all(self):
         return self.filter(is_deleted=0).all()
+    
+    def get_feed_by_id(self, feed_id):
+        return self.filter(is_deleted=0, id=feed_id).first()
+    
+    def update_feed_by_id(self, feed_id, *args, **kwargs):
+        return self.filter(is_deleted=0, id=feed_id).update(
+            name=kwargs.get("name"),
+            description=kwargs.get("description"),
+            feed_url=kwargs.get("feed_url"),
+            interval=kwargs.get("interval"),
+            enabled=kwargs.get("enabled"),
+        )
+    
+    def delete_feed_by_id(self, feed_id):
+        return self.filter(is_deleted=0, id=feed_id).update(is_deleted=1)
+    
+    def switch_feed_enabled_by_id(self, feed_id):
+        with transaction.atomic():
+            obj = self.filter(is_deleted=0, id=feed_id).first()
+            obj.enabled = not obj.enabled
+            obj.save()
+
+            return obj
 
 
 class FeedModel(BaseModel):
@@ -51,3 +75,16 @@ class FeedModel(BaseModel):
 
     last_refresh_time = models.DateTimeField(default=datetime.datetime.now)
     author = models.PositiveIntegerField()
+
+    def convert(self):
+        return {
+        "feedName": self.name,
+        "description": self.description,
+        "feedUrl": self.feed_url,
+        "interval": int(self.interval),
+        "status": int(self.status),
+        "enabled": int(self.enabled),
+        "healthStatus": int(self.health_status),
+        "lastRefreshTime": int(self.last_refresh_time),
+        "author": self.author,
+    }
