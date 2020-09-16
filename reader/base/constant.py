@@ -39,6 +39,7 @@ class FeedHealthStatus:
     DEAD = 3
 
 
+# TODO 把状态码相关的常量，移动到 BaseView 里去
 class ResponseCode:
     SUCCESS = 2000
 

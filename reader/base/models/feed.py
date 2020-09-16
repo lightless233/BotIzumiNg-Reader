@@ -24,11 +24,11 @@ class FeedManager(models.Manager):
 
     def all(self):
         return self.filter(is_deleted=0).all()
-    
+
     def get_feed_by_id(self, feed_id):
         return self.filter(is_deleted=0, id=feed_id).first()
-    
-    def update_feed_by_id(self, feed_id, *args, **kwargs):
+
+    def update_feed_by_id(self, feed_id, **kwargs):
         return self.filter(is_deleted=0, id=feed_id).update(
             name=kwargs.get("name"),
             description=kwargs.get("description"),
@@ -36,10 +36,10 @@ class FeedManager(models.Manager):
             interval=kwargs.get("interval"),
             enabled=kwargs.get("enabled"),
         )
-    
+
     def delete_feed_by_id(self, feed_id):
         return self.filter(is_deleted=0, id=feed_id).update(is_deleted=1)
-    
+
     def switch_feed_enabled_by_id(self, feed_id):
         with transaction.atomic():
             obj = self.filter(is_deleted=0, id=feed_id).first()
@@ -78,13 +78,13 @@ class FeedModel(BaseModel):
 
     def convert(self):
         return {
-        "feedName": self.name,
-        "description": self.description,
-        "feedUrl": self.feed_url,
-        "interval": int(self.interval),
-        "status": int(self.status),
-        "enabled": int(self.enabled),
-        "healthStatus": int(self.health_status),
-        "lastRefreshTime": int(self.last_refresh_time),
-        "author": self.author,
-    }
+            "feedName": self.name,
+            "description": self.description,
+            "feedUrl": self.feed_url,
+            "interval": int(self.interval),
+            "status": int(self.status),
+            "enabled": int(self.enabled),
+            "healthStatus": int(self.health_status),
+            "lastRefreshTime": self.last_refresh_time,
+            "author": self.author,
+        }

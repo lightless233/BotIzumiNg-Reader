@@ -12,24 +12,23 @@
     :license:   GPL-3.0, see LICENSE for more details.
     :copyright: Copyright (c) 2017-2020 lightless. All rights reserved
 """
-import time
 from datetime import datetime
 
 from django.views import View
 
-from reader.api.controller import json_response
-from reader.base.constant import ResponseCode, TIME_FORMAT_STRING
+from reader.api.controller import json_response, log_request
+from reader.base.constant import ResponseCode
+from reader.base.models import FeedModel
 from reader.util.logger import logger
 from reader.util.validator import RequestValidator
-from reader.base.models import FeedModel
 
 
 class AddFeedsView(View):
 
     @staticmethod
     @json_response
+    @log_request
     def post(request):
-        logger.debug("POST: {}".format(request.body))
 
         check_result = RequestValidator.check(request, {
             "name": {"empty": True},
@@ -59,22 +58,6 @@ class AddFeedsView(View):
         )
         if obj:
             return {"code": ResponseCode.SUCCESS, "message": "添加成功!", "data": obj.convert()}
-            # return {
-            #     "code": ResponseCode.SUCCESS,
-            #     "message": "添加成功!",
-            #     "data": {
-            #         "id": obj.id,
-            #         "feedName": obj.name,
-            #         "description": obj.description,
-            #         "feedUrl": obj.feed_url,
-            #         "interval": int(obj.interval),
-            #         "status": int(obj.status),
-            #         "healthStatus": int(obj.health_status),
-            #         "enabled": int(obj.enabled),
-            #         "lastRefreshTime": obj.last_refresh_time.strftime(TIME_FORMAT_STRING),
-            #         "author": obj.author,
-            #     }
-            # }
         else:
             return {
                 "code": ResponseCode.ERROR_DB,
@@ -90,19 +73,6 @@ class ListFeedView(View):
         objs = FeedModel.instance.all()
         for obj in objs:
             result.append(obj.convert())
-            # result.append({
-            #     "id": obj.id,
-            #     "feedName": obj.name,
-            #     "description": obj.description,
-            #     "feedUrl": obj.feed_url,
-            #     "interval": int(obj.interval),
-            #     "status": int(obj.status),
-            #     "healthStatus": int(obj.health_status),
-            #     "enabled": int(obj.enabled),
-            #     "lastRefreshTime": obj.last_refresh_time.strftime(TIME_FORMAT_STRING),
-            #     "author": obj.author,
-            # })
-        # time.sleep(10)
         return {
             "code": ResponseCode.SUCCESS,
             "data": result,
@@ -113,9 +83,8 @@ class ListFeedView(View):
 class UpdateFeedView(View):
     @staticmethod
     @json_response
+    @log_request
     def post(request):
-        logger.debug("POST: {}".format(request.body))
-
         check_result = RequestValidator.check(request, {
             "feedId": {"empty": True, "type": int},
             "name": {"empty": True},
@@ -129,65 +98,65 @@ class UpdateFeedView(View):
             m = check_result.error_message
             logger.error("error: {}".format(m))
             return {"code": ResponseCode.ERROR_PARAMS, "message": m}
-        
+
         params = check_result.params
-        
+
         if not FeedModel.instance.get_feed_by_id(params.get("feedId")):
             return {"code": ResponseCode.ERROR_PARAMS, "message": "feedId不存在!"}
         else:
-            obj: FeedModel = FeedModel.instance.update_feed_by_id(params.get("feedId"), 
-                name=kwargs.get("name"),
-                description=kwargs.get("description"),
-                feed_url=kwargs.get("feed_url"),
-                interval=kwargs.get("interval"),
-                enabled=kwargs.get("enabled"),
+            obj: FeedModel = FeedModel.instance.update_feed_by_id(
+                params.get("feedId"),
+                name=params.get("name"),
+                description=params.get("description"),
+                feed_url=params.get("feedUrl"),
+                interval=params.get("interval"),
+                enabled=params.get("enabled"),
             )
             if not obj:
                 logger.error("update feed failed.")
                 return {"code": ResponseCode.ERROR_DB, "message": "update feed failed."}
             else:
                 data = obj.convert()
-                return {"code": ResponseCode.SUCCESS, "message": "Update success.", "data": data};
+                return {"code": ResponseCode.SUCCESS, "message": "Update success.", "data": data}
 
 
 class DeleteFeedView(View):
-    @staticmethod
+
     @json_response
-    def post(request):
-        logger.debug("POST: {}".format(request.body))
+    @log_request
+    def post(self, request):
 
         check_result = RequestValidator.check(request, {
             "feedId": {"empty": True, "type": int},
         }, RequestValidator.Methods.POST_JSON)
         if check_result.error:
             msg = check_result.error_message
-            logger.error("error: {}".format(msg))
+            logger.error(f"error: {msg}")
             return {"code": ResponseCode.ERROR_PARAMS, "message": msg}
-        
+
         params = check_result.params
 
         if not FeedModel.instance.get_feed_by_id(params.get("feedId")):
             return {"code": ResponseCode.ERROR_PARAMS, "message": "feedId不存在!"}
-        
-        obj = FeedModel.instance.delete_feed_by_id(feed_id)
+
+        obj = FeedModel.instance.delete_feed_by_id(params.get("feedId"))
         if obj:
             return {"code": ResponseCode.SUCCESS, "message": "Delete success.", "data": obj.convert()}
 
 
-class SwitchFeedEnabledView(View):
-    @staticmethod
+class ChangeFeedEnabledView(View):
     @json_response
-    def post(request):
-        logger.debug("POST: {}".format(request.body))
+    @log_request
+    def post(self, request):
 
         check_result = RequestValidator.check(request, {
             "feedId": {"empty": True, "type": int},
         }, RequestValidator.Methods.POST_JSON)
         if check_result.error:
             msg = check_result.error_message
-            logger.error("error: {}".format(msg))
+            logger.error(f"error: {msg}")
             return {"code": ResponseCode.ERROR_PARAMS, "message": msg}
-        
+
         params = check_result.params
 
         obj = FeedModel.instance.switch_feed_enabled_by_id(params.get("feedId"))

@@ -20,4 +20,7 @@ from reader.api.controller import feeds
 urlpatterns = [
     path("v1/feed/add", feeds.AddFeedsView.as_view()),
     path("v1/feed/list", feeds.ListFeedView.as_view()),
+    path("v1/feed/update", feeds.UpdateFeedView.as_view()),
+    path("v1/feed/delete", feeds.DeleteFeedView.as_view()),
+    path("v1/feed/change_enabled", feeds.ChangeFeedEnabledView.as_view()),
 ]
