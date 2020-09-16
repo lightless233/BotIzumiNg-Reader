@@ -17,6 +17,7 @@ import datetime
 from django.db import models
 from django.db import transaction
 
+from reader.base import constant
 from reader.base.models._base import BaseModel
 
 
@@ -78,6 +79,7 @@ class FeedModel(BaseModel):
 
     def convert(self):
         return {
+            "id": self.id,
             "feedName": self.name,
             "description": self.description,
             "feedUrl": self.feed_url,
@@ -85,6 +87,6 @@ class FeedModel(BaseModel):
             "status": int(self.status),
             "enabled": int(self.enabled),
             "healthStatus": int(self.health_status),
-            "lastRefreshTime": self.last_refresh_time,
+            "lastRefreshTime": self.last_refresh_time.strftime(constant.TIME_FORMAT_STRING),
             "author": self.author,
         }
