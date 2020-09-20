@@ -23,4 +23,5 @@ urlpatterns = [
     path("v1/feed/update", feeds.UpdateFeedView.as_view()),
     path("v1/feed/delete", feeds.DeleteFeedView.as_view()),
     path("v1/feed/switch_enabled", feeds.SwitchFeedEnabledView.as_view()),
+    path("v1/feed/get_by_id", feeds.GetFeedDetailByIdView.as_view())
 ]

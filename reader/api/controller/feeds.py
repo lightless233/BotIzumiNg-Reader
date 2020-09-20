@@ -19,6 +19,7 @@ from django.views import View
 from reader.api.controller import json_response, log_request
 from reader.base.constant import ResponseCode
 from reader.base.models import FeedModel
+from reader.service.feeds import FeedService
 from reader.util.logger import logger
 from reader.util.validator import RequestValidator
 
@@ -141,7 +142,7 @@ class DeleteFeedView(View):
 
         obj = FeedModel.instance.delete_feed_by_id(params.get("feedId"))
         if obj:
-            return {"code": ResponseCode.SUCCESS, "message": "Delete success.", "data": obj.convert()}
+            return {"code": ResponseCode.SUCCESS, "message": "删除成功."}
 
 
 class SwitchFeedEnabledView(View):
@@ -164,3 +165,22 @@ class SwitchFeedEnabledView(View):
             return {"code": ResponseCode.SUCCESS, "message": "切换成功.", "data": obj.convert()}
         else:
             return {"code": ResponseCode.ERROR_DB, "message": "切换失败."}
+
+
+class GetFeedDetailByIdView(View):
+    service = FeedService()
+
+    @json_response
+    @log_request
+    def get(self, request):
+        result = self.service.get_detail_by_id(request)
+        obj = result.get("obj")
+        if obj:
+            return {"code": ResponseCode.SUCCESS, "message": "获取成功", "data": obj.convert()}
+        else:
+            # error
+            check_result = result.get("check_result")
+            if check_result.error:
+                return {"code": ResponseCode.ERROR_PARAMS, "message": check_result.error_message}
+            else:
+                return {"code": ResponseCode.ERROR_DB, "message": "ID不存在."}

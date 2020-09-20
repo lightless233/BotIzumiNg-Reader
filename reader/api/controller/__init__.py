@@ -14,6 +14,7 @@
 """
 from functools import wraps
 
+from django.core.handlers.wsgi import WSGIRequest
 from django.http import JsonResponse
 
 from reader.util.logger import logger
@@ -31,8 +32,17 @@ def json_response(view_func):
 def log_request(view_func):
     @wraps(view_func)
     def _wrap(*args, **kwargs):
-        request = args[0]
-        logger.debug("URI: {}, POST: {}".format(request.path, request.body))
+        request = None
+
+        for arg in args:
+            if isinstance(arg, WSGIRequest):
+                request = arg
+                break
+
+        if request is not None:
+            logger.debug("URI: {}, POST: {}".format(request.path, request.body))
+        else:
+            logger.warning("无法获取 request 实例.")
         return view_func(*args, **kwargs)
 
     return _wrap
