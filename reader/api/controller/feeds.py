@@ -144,7 +144,7 @@ class DeleteFeedView(View):
             return {"code": ResponseCode.SUCCESS, "message": "Delete success.", "data": obj.convert()}
 
 
-class ChangeFeedEnabledView(View):
+class SwitchFeedEnabledView(View):
     @json_response
     @log_request
     def post(self, request):
