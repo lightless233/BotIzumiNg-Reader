@@ -5,3 +5,4 @@ sqlparse==0.3.1
 aiohttp==3.6.2
 feedparser==5.2.1
 jieba==0.42.1
+pyjwt

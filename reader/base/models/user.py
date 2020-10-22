@@ -13,6 +13,7 @@
     :copyright: Copyright (c) 2017-2020 lightless. All rights reserved
 """
 import datetime
+import uuid
 
 from django.db import models
 
@@ -20,7 +21,15 @@ from reader.base.models._base import BaseModel
 
 
 class UserManager(models.Manager):
-    pass
+    def get_user_by_email(self, email):
+        return self.filter(is_deleted=0, email=email).first()
+
+    def get_user_by_nickname(self, nickname):
+        return self.filter(is_deleted=0, nickname=nickname).first()
+
+    def add_user(self, nickname, email, password):
+        u = uuid.uuid1()
+        return self.create(nickname=nickname, email=email, password=password, uuid=u)
 
 
 class UserModel(BaseModel):

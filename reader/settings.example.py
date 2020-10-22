@@ -106,3 +106,9 @@ ALLOWED_ORIGINS = [
     "localhost",
     "127.0.0.1",
 ]
+
+# PASSWORD SALT
+PASSWORD_SALT = ""
+
+# JWT SECRET
+JWT_SECRET = ""
