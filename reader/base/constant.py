@@ -50,3 +50,4 @@ class ResponseCode:
 
 
 TIME_FORMAT_STRING = "%Y-%m-%d %H:%M:%S"
+AUTH_TOKEN = "X-READER-AUTH"

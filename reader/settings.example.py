@@ -51,7 +51,9 @@ MIDDLEWARE = [
     # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
     "reader.base.middleware.cors_middleware.CORSMiddleware",
+    "reader.base.middleware.login_middleware.LoginMiddleware",
 ]
 
 ROOT_URLCONF = 'reader.urls'

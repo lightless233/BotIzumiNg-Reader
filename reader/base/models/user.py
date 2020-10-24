@@ -27,6 +27,9 @@ class UserManager(models.Manager):
     def get_user_by_nickname(self, nickname):
         return self.filter(is_deleted=0, nickname=nickname).first()
 
+    def get_user_by_uuid(self, _uuid):
+        return self.filter(is_deleted=0, uuid=_uuid).first()
+
     def add_user(self, nickname, email, password):
         u = uuid.uuid1()
         return self.create(nickname=nickname, email=email, password=password, uuid=u)

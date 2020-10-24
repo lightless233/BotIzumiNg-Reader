@@ -119,5 +119,5 @@ class LoginView(View):
             "code": ResponseCode.SUCCESS,
             "message": "Login success!"
         })
-        response.set_cookie("X-READER-AUTH", token)
+        response.set_cookie("X-READER-AUTH", token.decode("UTF-8"))
         return response

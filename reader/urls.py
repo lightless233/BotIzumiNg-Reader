@@ -16,7 +16,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from reader.api.controller.user import RegisterView, LoginView
+
 urlpatterns = [
     # path('admin/', admin.site.urls),
-    path("api/", include("reader.api.urls"))
+    path("/api/", include("reader.api.urls")),
+    path("register", RegisterView.as_view()),
+    path("login", LoginView.as_view()),
 ]
