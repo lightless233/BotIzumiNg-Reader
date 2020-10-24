@@ -20,7 +20,7 @@ from reader.api.controller.user import RegisterView, LoginView
 
 urlpatterns = [
     # path('admin/', admin.site.urls),
-    path("/api/", include("reader.api.urls")),
+    path("api/", include("reader.api.urls")),
     path("register", RegisterView.as_view()),
     path("login", LoginView.as_view()),
 ]

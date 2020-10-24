@@ -51,3 +51,7 @@ class ResponseCode:
 
 TIME_FORMAT_STRING = "%Y-%m-%d %H:%M:%S"
 AUTH_TOKEN = "X-READER-AUTH"
+NOT_LOGIN_JSON = {
+    "code": 4001,
+    "message": "用户未登录."
+}

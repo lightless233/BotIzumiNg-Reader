@@ -19,7 +19,9 @@ from reader.base.models._base import BaseModel
 
 
 class MemberFeedsManager(models.Manager):
-    pass
+
+    def get_feeds_by_userid(self, userid):
+        return self.filter(is_deleted=0, member_id=userid).all()
 
 
 class MemberFeedsModel(BaseModel):
@@ -30,4 +32,4 @@ class MemberFeedsModel(BaseModel):
     instance = MemberFeedsManager()
 
     member_id = models.BigIntegerField(default=0)
-    feeds_id = models.BigIntegerField(default=0)
+    feed_id = models.BigIntegerField(default=0)

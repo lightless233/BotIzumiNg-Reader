@@ -79,8 +79,14 @@ class LoginMiddleware(MiddlewareMixin):
                 "message": "用户未登录."
             })
         else:
-            request.session["uuid"] = row.uuid
-            return self.get_response()
+            user_dict = {
+                "uuid": row.uuid,
+                "id": row.id,
+                "nickname": row.nickname,
+                "email": row.email,
+            }
+            request.session["user"] = user_dict
+            return self.get_response(request)
 
     @staticmethod
     def process_response(*args):

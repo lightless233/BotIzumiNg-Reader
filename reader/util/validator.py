@@ -19,6 +19,7 @@ from django.http import HttpRequest
 
 
 class RequestValidator:
+    # TODO: move these code to `BaseView`, and make params be a class field
     class Result:
         def __init__(self):
             self.error: Optional[bool] = None

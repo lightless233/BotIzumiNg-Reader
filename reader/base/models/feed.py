@@ -26,8 +26,11 @@ class FeedManager(models.Manager):
     def all(self):
         return self.filter(is_deleted=0).all()
 
-    def get_feed_by_id(self, feed_id):
-        return self.filter(is_deleted=0, id=feed_id).first()
+    def get_feeds_by_id_list(self, feed_id_list):
+        return self.filter(is_deleted=0, id__in=feed_id_list).all()
+
+    def get_feed_by_url(self, url):
+        return self.filter(is_deleted=0, feed_url=url).first()
 
     def update_feed_by_id(self, feed_id, **kwargs):
         return self.filter(is_deleted=0, id=feed_id).update(
