@@ -17,14 +17,9 @@ from django.conf import settings
 from django.http import JsonResponse
 from django.utils.deprecation import MiddlewareMixin
 
-from reader.base.constant import AUTH_TOKEN
+from reader.base.constant import AUTH_TOKEN, ResponseCode
 from reader.base.models import UserModel
 from reader.util.logger import logger
-
-
-class LoginCode:
-    SUCCESS = 2000
-    NOT_LOGIN = 4001
 
 
 class LoginMiddleware(MiddlewareMixin):
@@ -46,14 +41,16 @@ class LoginMiddleware(MiddlewareMixin):
             return self.get_response(request)
 
         cookie_auth_token = request.COOKIES.get(AUTH_TOKEN)
-        header_auth_token = request.META.get(AUTH_TOKEN)
+        header_auth_token = request.META.get("HTTP_" + AUTH_TOKEN.replace("-", "_"))
 
         auth_token = cookie_auth_token if cookie_auth_token is not None else header_auth_token
         if auth_token is None:
             return JsonResponse({
-                "code": LoginCode.NOT_LOGIN,
+                "code": ResponseCode.NOT_LOGIN,
                 "message": "用户未登录."
             })
+
+        logger.debug(f"auth_token: {auth_token}")
 
         try:
             # {"id": "uuid"}
@@ -62,20 +59,20 @@ class LoginMiddleware(MiddlewareMixin):
         except jwt.exceptions.PyJWTError as e:
             logger.error(f"Error when decode jwt, value: {auth_token}")
             return JsonResponse({
-                "code": LoginCode.NOT_LOGIN,
+                "code": ResponseCode.NOT_LOGIN,
                 "message": "用户未登录."
             })
 
         if uuid is None:
             return JsonResponse({
-                "code": LoginCode.NOT_LOGIN,
+                "code": ResponseCode.NOT_LOGIN,
                 "message": "用户未登录."
             })
 
         row: UserModel = UserModel.instance.get_user_by_uuid(uuid)
         if not row:
             return JsonResponse({
-                "code": LoginCode.NOT_LOGIN,
+                "code": ResponseCode.NOT_LOGIN,
                 "message": "用户未登录."
             })
         else:

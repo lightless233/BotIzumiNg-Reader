@@ -48,10 +48,12 @@ class ResponseCode:
     ERROR_DB = 4002
     ERROR_RUNTIME = 4003
 
+    NOT_LOGIN = 6001
+
 
 TIME_FORMAT_STRING = "%Y-%m-%d %H:%M:%S"
 AUTH_TOKEN = "X-READER-AUTH"
 NOT_LOGIN_JSON = {
-    "code": 4001,
+    "code": ResponseCode.NOT_LOGIN,
     "message": "用户未登录."
 }
