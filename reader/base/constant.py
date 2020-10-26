@@ -52,7 +52,7 @@ class ResponseCode:
 
 
 TIME_FORMAT_STRING = "%Y-%m-%d %H:%M:%S"
-AUTH_TOKEN = "X-READER-AUTH"
+AUTH_TOKEN = "X-ReaderToken"
 NOT_LOGIN_JSON = {
     "code": ResponseCode.NOT_LOGIN,
     "message": "用户未登录."

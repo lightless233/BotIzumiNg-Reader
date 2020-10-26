@@ -12,6 +12,8 @@
     :license:   GPL-3.0, see LICENSE for more details.
     :copyright: Copyright (c) 2017-2020 lightless. All rights reserved
 """
+import time
+
 import jwt
 from django.contrib.auth.hashers import make_password, check_password
 from django.http import JsonResponse
@@ -19,6 +21,7 @@ from django.views import View
 from django.conf import settings
 
 from reader.api.controller import json_response
+from reader.base import constant
 from reader.base.constant import ResponseCode
 from reader.base.models import UserModel
 from reader.util.logger import logger
@@ -114,10 +117,11 @@ class LoginView(View):
         #   "uuid": member-uuid,
         # }
         # TODO: web 应用启动的时候，需要判断是否有配置 JWT_TOKEN PASSWORD_SALT
-        token = jwt.encode({"id": user.uuid}, settings.JWT_SECRET)
+        token = jwt.encode({"id": user.uuid, "expire": int(time.time()) + 3600 * 24}, settings.JWT_SECRET)
         response = JsonResponse({
             "code": ResponseCode.SUCCESS,
             "message": "Login success!"
         })
-        response.set_cookie("X-READER-AUTH", token.decode("UTF-8"), samesite="Lax")
+        response.set_cookie(constant.AUTH_TOKEN, token.decode("UTF-8"), samesite="Lax")
+        response[constant.AUTH_TOKEN] = token.decode("UTF-8")
         return response

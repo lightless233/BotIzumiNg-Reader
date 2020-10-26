@@ -12,12 +12,14 @@
     :license:   GPL-3.0, see LICENSE for more details.
     :copyright: Copyright (c) 2017-2020 lightless. All rights reserved
 """
+import time
+
 import jwt
 from django.conf import settings
 from django.http import JsonResponse
 from django.utils.deprecation import MiddlewareMixin
 
-from reader.base.constant import AUTH_TOKEN, ResponseCode
+from reader.base.constant import AUTH_TOKEN, ResponseCode, NOT_LOGIN_JSON
 from reader.base.models import UserModel
 from reader.util.logger import logger
 
@@ -40,42 +42,36 @@ class LoginMiddleware(MiddlewareMixin):
         if not request.path.startswith("/api/"):
             return self.get_response(request)
 
-        cookie_auth_token = request.COOKIES.get(AUTH_TOKEN)
-        header_auth_token = request.META.get("HTTP_" + AUTH_TOKEN.replace("-", "_"))
-
-        auth_token = cookie_auth_token if cookie_auth_token is not None else header_auth_token
-        if auth_token is None:
+        h_auth_token = request.META.get("HTTP_" + AUTH_TOKEN.replace("-", "_").upper())
+        if h_auth_token is None:
             return JsonResponse({
                 "code": ResponseCode.NOT_LOGIN,
                 "message": "用户未登录."
             })
-
-        logger.debug(f"auth_token: {auth_token}")
 
         try:
             # {"id": "uuid"}
-            result: dict = jwt.decode(auth_token, settings.JWT_SECRET)
+            result: dict = jwt.decode(h_auth_token, settings.JWT_SECRET)
             uuid = result.get("id")
+            expire = result.get("expire")
         except jwt.exceptions.PyJWTError as e:
-            logger.error(f"Error when decode jwt, value: {auth_token}")
-            return JsonResponse({
-                "code": ResponseCode.NOT_LOGIN,
-                "message": "用户未登录."
-            })
+            logger.error(f"Error when decode jwt, value: {h_auth_token}, error: {e}")
+            return JsonResponse(NOT_LOGIN_JSON)
 
-        if uuid is None:
-            return JsonResponse({
-                "code": ResponseCode.NOT_LOGIN,
-                "message": "用户未登录."
-            })
+        if uuid is None or expire is None:
+            return JsonResponse(NOT_LOGIN_JSON)
+
+        # 检查 token 是否过期了
+        current_time = int(time.time())
+        if current_time > int(expire):
+            return JsonResponse(NOT_LOGIN_JSON)
 
         row: UserModel = UserModel.instance.get_user_by_uuid(uuid)
         if not row:
-            return JsonResponse({
-                "code": ResponseCode.NOT_LOGIN,
-                "message": "用户未登录."
-            })
+            return JsonResponse(NOT_LOGIN_JSON)
         else:
+            # 用户处于登录态，在 session 里写一份用户信息
+            # 同时把 token 挂到 response 上
             user_dict = {
                 "uuid": row.uuid,
                 "id": row.id,
@@ -85,6 +81,35 @@ class LoginMiddleware(MiddlewareMixin):
             request.session["user"] = user_dict
             return self.get_response(request)
 
-    @staticmethod
-    def process_response(*args):
-        return args[1]
+    def process_response(self, request, response):
+
+        # 只有 /api/ 下面的接口才校验是否登录
+        if not request.path.startswith("/api/"):
+            return self.get_response(request)
+
+        h_auth_token = request.META.get("HTTP_" + AUTH_TOKEN.replace("-", "_").upper())
+        if h_auth_token is None:
+            return JsonResponse(NOT_LOGIN_JSON)
+
+        # 解开 JWT
+        try:
+            result: dict = jwt.decode(h_auth_token, settings.JWT_SECRET)
+        except jwt.exceptions.PyJWTError as e:
+            logger.error(f"Error when decode jwt, value: {h_auth_token}, error: {e}")
+            return JsonResponse(NOT_LOGIN_JSON)
+
+        uuid = result.get("id")
+        expire_time = result.get("expire")
+
+        if uuid is None or expire_time is None:
+            return JsonResponse(NOT_LOGIN_JSON)
+
+        row: UserModel = UserModel.instance.get_user_by_uuid(uuid)
+        if not row:
+            return JsonResponse(NOT_LOGIN_JSON)
+        else:
+            # uuid 有对应的用户，更新出新的token
+            new_token = jwt.encode({"id": uuid, "expire": int(expire_time) + 3600 * 24}, settings.JWT_SECRET)
+            response[AUTH_TOKEN] = new_token.decode("UTF-8")
+
+        return response

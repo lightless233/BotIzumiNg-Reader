@@ -40,7 +40,7 @@ class CORSMiddleware:
             o = urlparse(origin)
             if o.hostname in self.allowed_origins:
                 response["Access-Control-Allow-Origin"] = origin
-                response["Access-Control-Allow-Headers"] = "Content-Type, X-CSRFToken, X-READER-AUTH"
+                response["Access-Control-Allow-Headers"] = "Content-Type, X-CSRFToken, X-ReaderToken"
                 response["Access-Control-Allow-Credentials"] = "true"
                 return response
             else:
