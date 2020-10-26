@@ -32,9 +32,8 @@ class LoginMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
         """
-        检查 cookie 中是否有 JWT
-        如果没有，就直接return
-        如果有，则解码将 UUID 放到 session 中
+        request 时候，检查头部是否有token，并根据 token 获取用户身份，放到 session 中
+        （此处存疑，session也有可能有问题）
         :param request:
         :return:
         """
@@ -69,6 +68,7 @@ class LoginMiddleware(MiddlewareMixin):
         else:
             # 用户处于登录态，在 session 里写一份用户信息
             # 同时把 token 挂到 response 上
+            # TODO 这里性能有问题，先这么写，后面再测
             user_dict = {
                 "uuid": row.uuid,
                 "id": row.id,
