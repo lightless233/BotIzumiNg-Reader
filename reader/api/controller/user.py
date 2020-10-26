@@ -122,6 +122,6 @@ class LoginView(View):
             "code": ResponseCode.SUCCESS,
             "message": "Login success!"
         })
-        response.set_cookie(constant.AUTH_TOKEN, token.decode("UTF-8"), samesite="Lax")
+        # response.set_cookie(constant.AUTH_TOKEN, token.decode("UTF-8"), samesite="Lax")
         response[constant.AUTH_TOKEN] = token.decode("UTF-8")
         return response

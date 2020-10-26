@@ -42,6 +42,7 @@ class CORSMiddleware:
                 response["Access-Control-Allow-Origin"] = origin
                 response["Access-Control-Allow-Headers"] = "Content-Type, X-CSRFToken, X-ReaderToken"
                 response["Access-Control-Allow-Credentials"] = "true"
+                response["Access-Control-Expose-Headers"] = "X-ReaderToken"
                 return response
             else:
                 return HttpResponseForbidden("invalid origin")
