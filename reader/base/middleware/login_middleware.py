@@ -19,7 +19,7 @@ from django.conf import settings
 from django.http import JsonResponse
 from django.utils.deprecation import MiddlewareMixin
 
-from reader.base.constant import AUTH_TOKEN, ResponseCode, NOT_LOGIN_JSON
+from reader.base.constant import AUTH_TOKEN, NOT_LOGIN_JSON
 from reader.base.models import UserModel
 from reader.util.logger import logger
 
@@ -44,10 +44,7 @@ class LoginMiddleware(MiddlewareMixin):
 
         h_auth_token = request.META.get("HTTP_" + AUTH_TOKEN.replace("-", "_").upper())
         if h_auth_token is None:
-            return JsonResponse({
-                "code": ResponseCode.NOT_LOGIN,
-                "message": "用户未登录."
-            })
+            return JsonResponse(NOT_LOGIN_JSON)
 
         try:
             # {"id": "uuid"}
