@@ -111,6 +111,10 @@ ALLOWED_ORIGINS = [
 
 # PASSWORD SALT
 PASSWORD_SALT = ""
+if PASSWORD_SALT is None or PASSWORD_SALT == "":
+    raise SystemError("PASSWORD_SALT 不能为空, 请在 reader/settings.py 中配置.")
 
 # JWT SECRET
 JWT_SECRET = ""
+if PASSWORD_SALT is None or PASSWORD_SALT == "":
+    raise SystemError("JWT_SECRET 不能为空, 请在 reader/settings.py 中配置.")
