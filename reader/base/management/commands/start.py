@@ -31,6 +31,7 @@ class Command(BaseCommand):
         except Exception as e:
             self.stdout.write(f"Error while starting izumi-ng reader, error: {e}")
 
-            import sys, traceback
+            import sys
+            import traceback
             full_err = ''.join(traceback.TracebackException(*sys.exc_info()).format())
             self.stdout.write(f"Full error below:\n {full_err}")

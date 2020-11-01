@@ -28,6 +28,8 @@ class Application(object):
         g.queue_context = self.queues = ApplicationQueueContext()
         self.engines = ApplicationEngineContext()
 
+        self._engines = {}
+
     def start(self):
         signal.signal(signal.SIGINT, self.__sigint)
         logger.info("exit process register done.")
@@ -37,6 +39,16 @@ class Application(object):
 
         self.init_engines()
         logger.info("Init engines done.")
+
+    def register_engine(self, engine):
+        """
+        注册 engine 的接口
+        :param engine:
+        :return:
+        """
+        instance = engine(self)
+        name = instance.name
+        self._engines[name] = instance
 
     def init_queues(self):
         self.queues.init_queues()
