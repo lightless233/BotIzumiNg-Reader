@@ -16,7 +16,6 @@ import queue
 
 import aiohttp
 
-from reader import g
 from reader.engine._base import CoPoolEngine
 from reader.util.logger import logger
 
@@ -26,15 +25,15 @@ class FetcherEngine(CoPoolEngine):
     def __init__(self, name, pool_size=None):
         super(FetcherEngine, self).__init__(name, pool_size)
 
-        self.feed_task_queue: queue.Queue = g.queue_context.feed_task_queue
-        self.parser_task_queue: queue.Queue = g.queue_context.parser_task_queue
-
         self.client_timeout = aiohttp.ClientTimeout(total=60, connect=12, sock_read=12, sock_connect=12)
 
     async def _worker(self, idx):
         self._init_event()
         cur_name = f"{self.name}-{idx}"
         logger.info(f"{cur_name} start.")
+
+        self.feed_task_queue: queue.Queue = self.application.queues.feed_task_queue
+        self.parser_task_queue: queue.Queue = self.application.queues.parser_task_queue
 
         while self.is_running():
             try:

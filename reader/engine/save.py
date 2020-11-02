@@ -12,10 +12,9 @@
     :license:   GPL-3.0, see LICENSE for more details.
     :copyright: Copyright (c) 2017-2020 lightless. All rights reserved
 """
-import queue
 import hashlib
+import queue
 
-from reader import g
 from reader.base.models import PaperModel
 from reader.engine._base import ThreadEngine
 from reader.util.logger import logger
@@ -25,11 +24,10 @@ class SaveEngine(ThreadEngine):
     def __init__(self, name):
         super(SaveEngine, self).__init__(name)
 
-        self.save_queue: queue.Queue = g.queue_context.save_task_queue
-
     def _worker(self):
-
         logger.info(f"{self.name} start!")
+
+        self.save_queue = self.application.queues.save_task_queue
 
         while self.is_running():
             try:

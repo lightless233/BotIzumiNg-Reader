@@ -14,8 +14,7 @@
 """
 from django.core.management import BaseCommand
 
-from reader import g
-from reader.application import Application
+from reader.application import application
 
 
 class Command(BaseCommand):
@@ -26,8 +25,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("Starting izumi-ng reader."))
 
         try:
-            g.application = app = Application()
-            app.start()
+            application.start()
         except Exception as e:
             self.stdout.write(f"Error while starting izumi-ng reader, error: {e}")
 

@@ -17,7 +17,6 @@ import queue
 import feedparser
 import jieba.analyse
 
-from reader import g
 from reader.engine._base import ThreadEngine
 from reader.util.logger import logger
 
@@ -27,13 +26,13 @@ class ParserEngine(ThreadEngine):
     def __init__(self, name):
         super(ParserEngine, self).__init__(name)
 
-        self.parser_task_queue: queue.Queue = g.queue_context.parser_task_queue
-        self.save_queue: queue.Queue = g.queue_context.save_task_queue
-
     def _worker(self):
         # 有两种格式，需要分别做解析
         # rss20 -> "https://paper.seebug.org/rss/"
         # atom10 -> "http://wiki.ioin.in/atom"
+
+        self.parser_task_queue: queue.Queue = self.application.queues.parser_task_queue
+        self.save_queue: queue.Queue = self.application.queues.save_task_queue
 
         while self.is_running():
 

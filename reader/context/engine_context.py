@@ -17,6 +17,7 @@ from typing import Optional
 from reader.engine import FetcherEngine, RefreshEngine, ParserEngine, SaveEngine
 
 
+@DeprecationWarning
 class ApplicationEngineContext(object):
 
     def __init__(self):

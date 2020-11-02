@@ -15,7 +15,6 @@
 import datetime
 import queue
 
-from reader import g
 from reader.base.constant import FeedStatus
 from reader.base.models.feed import FeedModel
 from reader.engine._base import ThreadEngine
@@ -40,7 +39,7 @@ class RefreshEngine(ThreadEngine):
     def _worker(self):
 
         logger.info(f"{self.name} start!")
-        task_queue = g.queue_context.feed_task_queue
+        task_queue = self.application.queues.feed_task_queue
 
         while self.is_running():
 

@@ -29,6 +29,11 @@ class CommonBaseEngine(object):
         self.name = "_base_engine_"
         self.status = EngineStatus.READY
 
+        self.application = self.application_context = None
+
+    def set_application_context(self, application):
+        self.application = self.application_context = application
+
     def is_running(self):
         return self.status == EngineStatus.RUNNING
 
