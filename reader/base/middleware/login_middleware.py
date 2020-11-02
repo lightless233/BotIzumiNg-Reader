@@ -47,7 +47,9 @@ class LoginMiddleware(MiddlewareMixin):
 
         try:
             # {"id": "uuid"}
-            result: dict = jwt.decode(h_auth_token, settings.JWT_SECRET)
+            # result: dict = jwt.decode(h_auth_token, settings.JWT_SECRET)
+            result: dict = jwt.decode(h_auth_token, settings.JWT_PUBLIC, algorithms='RS256')
+
             uuid = result.get("id")
             expire = result.get("expire")
         except jwt.exceptions.PyJWTError as e:
@@ -90,7 +92,8 @@ class LoginMiddleware(MiddlewareMixin):
 
         # 解开 JWT
         try:
-            result: dict = jwt.decode(h_auth_token, settings.JWT_SECRET)
+            # result: dict = jwt.decode(h_auth_token, settings.JWT_SECRET)
+            result: dict = jwt.decode(h_auth_token, settings.JWT_PUBLIC, algorithms='RS256')
         except jwt.exceptions.PyJWTError as e:
             logger.error(f"Error when decode jwt, value: {h_auth_token}, error: {e}")
             return JsonResponse(NOT_LOGIN_JSON)

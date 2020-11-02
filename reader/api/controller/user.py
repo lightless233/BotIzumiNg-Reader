@@ -117,7 +117,9 @@ class LoginView(View):
         #   "uuid": member-uuid,
         # }
         # TODO: web 应用启动的时候，需要判断是否有配置 JWT_TOKEN PASSWORD_SALT
-        token = jwt.encode({"id": user.uuid, "expire": int(time.time()) + 3600 * 24}, settings.JWT_SECRET)
+        # token = jwt.encode({"id": user.uuid, "expire": int(time.time()) + 3600 * 24}, settings.JWT_SECRET)
+        payload = {"id": user.uuid, "expire": int(time.time()) + 3600 * 24}
+        token = jwt.encode(payload, settings.JWT_PRIVATE, algorithm="RS256")
         response = JsonResponse({
             "code": ResponseCode.SUCCESS,
             "message": "Login success!"

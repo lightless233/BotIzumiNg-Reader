@@ -115,6 +115,21 @@ if PASSWORD_SALT is None or PASSWORD_SALT == "":
     raise SystemError("PASSWORD_SALT 不能为空, 请在 reader/settings.py 中配置.")
 
 # JWT SECRET
+# 格式如下：
+# JWT_PRIVATE = """-----BEGIN RSA PRIVATE KEY-----
+# ...
+# -----END RSA PRIVATE KEY-----
+# """
+# JWT_PUBLIC = """-----BEGIN PUBLIC KEY-----
+# ...
+# -----END PUBLIC KEY-----"""
+# 生成方式如下：
+# > ssh-keygen -t rsa -b 2048 -f private.key
+# > openssl rsa -in private.key -pubout -outform PEM -out public.key
+JWT_PRIVATE = ""
+JWT_PUBLIC = ""
+if JWT_PRIVATE == "" or JWT_PUBLIC == "":
+    raise SystemError("JWT_PRIVATE 与 JWT_PUBLIC 不能为空. 请在 reader/settings.py 中配置.")
 JWT_SECRET = ""
 if PASSWORD_SALT is None or PASSWORD_SALT == "":
     raise SystemError("JWT_SECRET 不能为空, 请在 reader/settings.py 中配置.")
