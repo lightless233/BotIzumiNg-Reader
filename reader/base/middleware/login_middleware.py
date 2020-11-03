@@ -51,7 +51,6 @@ class LoginMiddleware(MiddlewareMixin):
             result: dict = jwt.decode(h_auth_token, settings.JWT_PUBLIC, algorithms='RS256')
 
             uuid = result.get("id")
-            expire = result.get("expire")
         except jwt.exceptions.ExpiredSignatureError:
             logger.warning(f"JWT token expired.")
             return JsonResponse(NOT_LOGIN_JSON)
@@ -59,12 +58,7 @@ class LoginMiddleware(MiddlewareMixin):
             logger.error(f"Error when decode jwt, value: {h_auth_token}, error: {e}")
             return JsonResponse(NOT_LOGIN_JSON)
 
-        if uuid is None or expire is None:
-            return JsonResponse(NOT_LOGIN_JSON)
-
-        # 检查 token 是否过期了
-        current_time = int(time.time())
-        if current_time > int(expire):
+        if uuid is None:
             return JsonResponse(NOT_LOGIN_JSON)
 
         row: UserModel = UserModel.instance.get_user_by_uuid(uuid)
@@ -105,9 +99,9 @@ class LoginMiddleware(MiddlewareMixin):
             return JsonResponse(NOT_LOGIN_JSON)
 
         uuid = result.get("id")
-        expire_time = result.get("expire")
+        exp = result.get("exp")
 
-        if uuid is None or expire_time is None:
+        if uuid is None:
             return JsonResponse(NOT_LOGIN_JSON)
 
         row: UserModel = UserModel.instance.get_user_by_uuid(uuid)
@@ -115,7 +109,7 @@ class LoginMiddleware(MiddlewareMixin):
             return JsonResponse(NOT_LOGIN_JSON)
         else:
             # uuid 有对应的用户，更新出新的token
-            payload = {"id": uuid, "exp": int(expire_time) + 3600 * 24}
+            payload = {"id": uuid, "exp": int(exp) + 3600 * 24}
             new_token = jwt.encode(payload, settings.JWT_PRIVATE, algorithm="RS256")
             response[AUTH_TOKEN] = new_token.decode("UTF-8")
 
