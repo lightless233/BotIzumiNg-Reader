@@ -52,6 +52,9 @@ class LoginMiddleware(MiddlewareMixin):
 
             uuid = result.get("id")
             expire = result.get("expire")
+        except jwt.exceptions.ExpiredSignatureError:
+            logger.warning(f"JWT token expired.")
+            return JsonResponse(NOT_LOGIN_JSON)
         except jwt.exceptions.PyJWTError as e:
             logger.error(f"Error when decode jwt, value: {h_auth_token}, error: {e}")
             return JsonResponse(NOT_LOGIN_JSON)
@@ -94,6 +97,9 @@ class LoginMiddleware(MiddlewareMixin):
         try:
             # result: dict = jwt.decode(h_auth_token, settings.JWT_SECRET)
             result: dict = jwt.decode(h_auth_token, settings.JWT_PUBLIC, algorithms='RS256')
+        except jwt.exceptions.ExpiredSignatureError:
+            logger.warning(f"JWT token expired.")
+            return JsonResponse(NOT_LOGIN_JSON)
         except jwt.exceptions.PyJWTError as e:
             logger.error(f"Error when decode jwt, value: {h_auth_token}, error: {e}")
             return JsonResponse(NOT_LOGIN_JSON)
@@ -109,7 +115,8 @@ class LoginMiddleware(MiddlewareMixin):
             return JsonResponse(NOT_LOGIN_JSON)
         else:
             # uuid 有对应的用户，更新出新的token
-            new_token = jwt.encode({"id": uuid, "expire": int(expire_time) + 3600 * 24}, settings.JWT_SECRET)
+            payload = {"id": uuid, "exp": int(expire_time) + 3600 * 24}
+            new_token = jwt.encode(payload, settings.JWT_PRIVATE, algorithm="RS256")
             response[AUTH_TOKEN] = new_token.decode("UTF-8")
 
         return response
